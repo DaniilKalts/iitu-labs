@@ -62,17 +62,22 @@
    <li><b>subjects:</b>
       <ul>
          <li>subject_id (PK)</li>
-         <li>department_id (FK to departments.department_id)</li>
          <li>name</li>
          <li>description</li>
          <li>credits</li>
       </ul>
    </li>
-   <li><b>person:</b>
+   <li><b>department_subject:</b>
+      <ul>
+         <li>department_id (FK to departments.department_id)</li>
+         <li>subject_id (FK to subjects.subject_id)</li>
+      </ul>
+   </li>
+   <li><b>persons:</b>
       <ul>
          <li>person_id (PK)</li>
-         <li>name</li>
-         <li>surname</li>
+         <li>first_name</li>
+         <li>last_name</li>
          <li>patronymic</li>
          <li>gender</li>
          <li>birth_date</li>
@@ -82,50 +87,38 @@
          <li>email</li>
          <li>iin</li>
          <li>address</li>
-      </ul>
-   </li>
-   <li><b>teachers:</b>
-      <ul>
-         <li>teacher_id (PK, FK to person.person_id)</li>
          <li>education</li>
       </ul>
    </li>
    <li><b>deans:</b>
+        <ul>
+            <li>dean_id (PK, FK to persons.person_id)</li>
+            <li>faculty_id (FK to faculties.faculty_id)</li>
+        </ul>
+    </li>
+   <li><b>teachers:</b>
       <ul>
-         <li>dean_id (PK, FK to person.person_id)</li>
-         <li>faculty_id (FK to faculties.faculty_id)</li>
-         <li>education</li>
+         <li>teacher_id (PK, FK to persons.person_id)</li>
       </ul>
    </li>
-   <li><b>department_dean:</b>
+   <li><b>curators:</b>
       <ul>
-         <li>department_id (FK to departments.department_id)</li>
-         <li>dean_id (FK to deans.dean_id)</li>
-      </ul>
-   </li>
-   <li><b>subject_teacher:</b>
-      <ul>
-         <li>subject_id (FK to subjects.subject_id)</li>
-         <li>teacher_id (FK to teachers.teacher_id)</li>
-      </ul>
-   </li>
-   <li><b>students:</b>
-      <ul>
-         <li>student_id (PK, FK to person.person_id)</li>
-         <li>group_id (FK to groups.group_id)</li>
+         <li>curator_id (PK, FK to persons.person_id)</li>
       </ul>
    </li>
    <li><b>groups:</b>
-      <ul>
-         <li>group_id (PK)</li>
-         <li>course_year</li>
-         <li>name</li>
-      </ul>
+        <ul>
+            <li>group_id (PK)</li>
+            <li>curator_id (FK to curators.curator_id)</li>
+            <li>head_student_id (FK to students.student_id)</li>
+            <li>course_year</li>
+            <li>name</li>
+        </ul>
    </li>
-   <li><b>group_student:</b>
+   <li><b>students:</b>
       <ul>
+         <li>student_id (PK, FK to persons.person_id)</li>
          <li>group_id (FK to groups.group_id)</li>
-         <li>student_id (FK to students.student_id)</li>
       </ul>
    </li>
    <li><b>buildings:</b>
@@ -151,7 +144,8 @@
       <ul>
          <li>schedule_id (PK)</li>
          <li>group_id (FK to groups.group_id)</li>
-         <li>teacher_subject_id (FK to subject_teacher.subject_id)</li>
+         <li>subject_id (FK to subjects.subject_id)</li>
+         <li>teacher_id (FK to teachers.teacher_id)</li>
          <li>classroom_id (FK to classrooms.classroom_id)</li>
          <li>weekday</li>
          <li>start_time</li>
@@ -167,11 +161,11 @@
          <li>deadline</li>
       </ul>
    </li>
-   <li><b>assignment_student:</b>
+   <li><b>student_assignment</b>
       <ul>
-         <li>assignment_id (FK to assignments.assignment_id)</li>
          <li>student_id (FK to students.student_id)</li>
-         <li>mark</li>
+         <li>assignment_id (FK to assignments.assignment_id)</li>
+         <li>score</li>
       </ul>
    </li>
    <li><b>exams:</b>
@@ -189,16 +183,15 @@
          <li>schedule_id (FK to schedules.schedule_id)</li>
       </ul>
    </li>
-   <li><b>exam_student:</b>
+   <li><b>student_exam:</b>
       <ul>
-         <li>exam_id (FK to exams.exam_id)</li>
          <li>student_id (FK to students.student_id)</li>
-         <li>mark</li>
+         <li>exam_id (FK to exams.exam_id)</li>
+         <li>score</li>
       </ul>
    </li>
-   <li><b>attendance:</b>
+   <li><b>student_attendance:</b>
       <ul>
-         <li>attendance_id (PK)</li>
          <li>schedule_id (FK to schedules.schedule_id)</li>
          <li>student_id (FK to students.student_id)</li>
          <li>attended</li>
@@ -212,10 +205,10 @@
          <li>founded_date</li>
       </ul>
    </li>
-   <li><b>club_student:</b>
+   <li><b>student_club:</b>
       <ul>
-         <li>club_id (FK to clubs.club_id)</li>
          <li>student_id (FK to students.student_id)</li>
+         <li>club_id (FK to clubs.club_id)</li>
       </ul>
    </li>
 </ol>
@@ -244,10 +237,10 @@
          <li><b>credits:</b> Must be between 1 and 10.</li>
       </ul>
    </li>
-   <li><b>person:</b>
+   <li><b>persons:</b>
       <ul>
-         <li><b>name:</b> 2-100 characters.</li>
-         <li><b>surname:</b> 2-100 characters.</li>
+         <li><b>first_name:</b> 2-100 characters.</li>
+         <li><b>last_name:</b> 2-100 characters.</li>
          <li><b>patronymic:</b> 2-100 characters.</li>
          <li><b>gender:</b> Must be either MALE, FEMALE, or OTHER.</li>
          <li><b>birth_date:</b> Valid date, age must be between 17 and 70 (depending on role).</li>
@@ -255,15 +248,6 @@
          <li><b>email:</b> Valid email format.</li>
          <li><b>iin:</b> Exactly 12 digits.</li>
          <li><b>address:</b> 10-100 characters.</li>
-      </ul>
-   </li>
-   <li><b>teachers:</b>
-      <ul>
-         <li><b>education:</b> 20-200 characters.</li>
-      </ul>
-   </li>
-   <li><b>deans:</b>
-      <ul>
          <li><b>education:</b> 20-200 characters.</li>
       </ul>
    </li>
@@ -292,8 +276,8 @@
    <li><b>schedules:</b>
       <ul>
          <li><b>weekday:</b> Must be one of the days Monday to Sunday.</li>
-         <li><b>start_time:</b> Must be in valid time format (HH:MM:SS).</li>
-         <li><b>end_time:</b> Must be in valid time format (HH:MM:SS) and later than start_time.</li>
+         <li><b>start_time:</b> Must be in valid 24-hour time format (HH:MM:SS).</li>
+         <li><b>end_time:</b> Must be in valid 24-hour time format (HH:MM:SS) and must occur after the <b>start_time</b> on the same day.</li>
       </ul>
    </li>
    <li><b>assignments:</b>
@@ -301,6 +285,11 @@
          <li><b>name:</b> 5-40 characters.</li>
          <li><b>description:</b> 15-100 characters.</li>
          <li><b>deadline:</b> Must be a valid date.</li>
+      </ul>
+   </li>
+   <li><b>student_assignment:</b>
+      <ul>
+         <li><b>score:</b> Must be between 0 and 10.</li>
       </ul>
    </li>
    <li><b>exams:</b>
@@ -311,12 +300,12 @@
          <li><b>date:</b> Must be a valid date.</li>
       </ul>
    </li>
-   <li><b>exam_student:</b>
+   <li><b>student_exam:</b>
       <ul>
-         <li><b>mark:</b> Must be between 0 and 100.</li>
+         <li><b>score:</b> Must be between 0 and 100.</li>
       </ul>
    </li>
-   <li><b>attendance:</b>
+   <li><b>student_attendance:</b>
       <ul>
          <li><b>attended:</b> Boolean value (true/false).</li>
       </ul>
@@ -335,21 +324,40 @@
 <h3 style="color: #222222">4. Relations between tables:</h3>
 
 <ol>
-   <li>faculties - departments <b>(one-to-many)</b></li>
-   <li>departments - subjects <b>(one-to-many)</b></li>
-   <li>departments - deans <b>(one-to-one)</b></li>
-   <li>subjects - teachers <b>(many-to-many)</b></li>
-   <li>students - groups <b>(one-to-many)</b></li>
-   <li>students - clubs <b>(many-to-many)</b></li>
-   <li>students - attendance <b>(one-to-many)</b></li>
-   <li>assignments - students <b>(many-to-many)</b></li>
-   <li>schedules - classrooms <b>(one-to-many)</b></li>
-   <li>schedules - groups <b>(one-to-many)</b></li>
-   <li>schedules - teachers <b>(one-to-many)</b></li>
-   <li>schedules - assignments <b>(one-to-one)</b></li>
-   <li>exams - schedules <b>(one-to-one)</b></li>
-   <li>exams - students <b>(one-to-many)</b></li>
-   <li>classrooms - buildings <b>(one-to-many)</b></li>
+   <li><b>faculties:</b>
+      <ul>
+         <li><b>faculties - departments</b> (one-to-many)</li>
+         <li><b>faculties - deans</b> (one-to-one)</li>
+      </ul>
+   </li>
+   <li><b>departments:</b>
+      <ul>
+         <li><b>departments - subjects</b> (many-to-many)</li>
+      </ul>
+   </li>
+   <li><b>students:</b>
+      <ul>
+         <li><b>students - groups</b> (many-to-one)</li>
+         <li><b>students - attendance</b> (one-to-many)</li>
+         <li><b>students - clubs</b> (many-to-many)</li>
+         <li><b>students - assignments</b> (many-to-many)</li>
+         <li><b>students - exams</b> (many-to-many)</li>
+      </ul>
+   </li>
+   <li><b>schedules:</b>
+      <ul>
+         <li><b>schedules - assignments </b> (one-to-one)</li>
+         <li><b>schedules - classrooms </b> (many-to-one)</li>
+         <li><b>schedules - teachers</b> (many-to-one)</li>
+         <li><b>schedules - exams</b> (many-to-one)</li>
+         <li><b>schedules - groups</b> (many-to-one)</li>
+      </ul>
+   </li>
+   <li><b>classrooms:</b>
+      <ul>
+         <li><b>classrooms - buildings</b> (many-to-one)</li>
+      </ul>
+   </li>
 </ol>
 
 <h2 style="color: #222222">5. What access rights groups does the Database have?</h2>
@@ -360,6 +368,7 @@
    <li><b>User Group 1:</b> Students</li>
    <li><b>User Group 2:</b> Teachers</li>
    <li><b>User Group 3:</b> Deans</li>
+   <li><b>User Group 4:</b> Rector</li>
 </ul>
 
 <hr />
@@ -370,6 +379,7 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>departments:</b>
@@ -377,13 +387,23 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>subjects:</b>
       <ul>
          <li>Students - ro (read-only)</li>
-         <li>Teachers - rw (read-write)</li>
+         <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
+      </ul>
+   </li>
+   <li><b>department_subject:</b>
+      <ul>
+         <li>Students - ro (read-only)</li>
+         <li>Teachers - ro (read-only)</li>
+         <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>person:</b>
@@ -391,13 +411,7 @@
          <li>Students - rw (read-write for their own data)</li>
          <li>Teachers - rw (read-write for their own data)</li>
          <li>Deans - rw (read-write)</li>
-      </ul>
-   </li>
-   <li><b>teachers:</b>
-      <ul>
-         <li>Students - ro (read-only)</li>
-         <li>Teachers - rw (read-write for their own data)</li>
-         <li>Deans - rw (read-write for all teachers)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>deans:</b>
@@ -405,41 +419,39 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
-   <li><b>department_dean:</b>
+   <li><b>teachers:</b>
+      <ul>
+         <li>Students - ro (read-only)</li>
+         <li>Teachers - rw (read-write for their own data)</li>
+         <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
+      </ul>
+   </li>
+   <li><b>curators:</b>
       <ul>
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
-   <li><b>subject_teacher:</b>
-      <ul>
-         <li>Students - ro (read-only)</li>
-         <li>Teachers - rw (read-write for assigned subjects)</li>
-         <li>Deans - rw (read-write)</li>
-      </ul>
-   </li>
+    <li><b>groups:</b>
+        <ul>
+            <li>Students - ro (read-only)</li>
+            <li>Teachers - ro (read-only)</li>
+            <li>Deans - rw (read-write)</li>
+            <li>Rector - rw (read-write)</li>
+        </ul>
+    </li>
    <li><b>students:</b>
       <ul>
          <li>Students - rw (read-write for their own data)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
-      </ul>
-   </li>
-   <li><b>groups:</b>
-      <ul>
-         <li>Students - ro (read-only)</li>
-         <li>Teachers - ro (read-only)</li>
-         <li>Deans - rw (read-write)</li>
-      </ul>
-   </li>
-   <li><b>group_student:</b>
-      <ul>
-         <li>Students - ro (read-only)</li>
-         <li>Teachers - rw (read-only)</li>
-         <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>buildings:</b>
@@ -447,6 +459,7 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>classrooms:</b>
@@ -454,6 +467,7 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>schedules:</b>
@@ -461,6 +475,7 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - rw (read-write)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>assignments:</b>
@@ -468,13 +483,15 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - rw (read-write)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
-   <li><b>assignment_student:</b>
+   <li><b>student_assignment:</b>
       <ul>
-         <li>Students - rw (read-only)</li>
+         <li>Students - ro (read-only)</li>
          <li>Teachers - rw (read-write)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>exams:</b>
@@ -482,6 +499,7 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - rw (read-write)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>exam_schedule:</b>
@@ -489,20 +507,23 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - rw (read-write)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
-   <li><b>exam_student:</b>
-      <ul>
-         <li>Students - rw (read-only)</li>
-         <li>Teachers - rw (read-write)</li>
-         <li>Deans - rw (read-write)</li>
-      </ul>
-   </li>
-   <li><b>attendance:</b>
+   <li><b>student_exam:</b>
       <ul>
          <li>Students - ro (read-only)</li>
          <li>Teachers - rw (read-write)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
+      </ul>
+   </li>
+   <li><b>student_attendance:</b>
+      <ul>
+         <li>Students - ro (read-only)</li>
+         <li>Teachers - rw (read-write)</li>
+         <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
    <li><b>clubs:</b>
@@ -510,13 +531,15 @@
          <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
-   <li><b>club_student:</b>
+   <li><b>student_club:</b>
       <ul>
-         <li>Students - rw (read-write for their own data)</li>
+         <li>Students - ro (read-only)</li>
          <li>Teachers - ro (read-only)</li>
          <li>Deans - rw (read-write)</li>
+         <li>Rector - rw (read-write)</li>
       </ul>
    </li>
 </ol>
@@ -528,20 +551,20 @@
 <ol>
    <li><b>List all students from the first-year course.</b></li>
    <li><b>List all students from foreign countries.</b></li>
-   <li><b>List all students who failed the Mathematics exam.</b></li>
+   <li><b>List all students who failed the final Mathematics exam (score below 50).</b></li>
+   <li><b>List all students who need to take retake on Database Design.</b></li>
    <li><b>List the top 5 students from the first-year Cyber Security course based on GPA.</b></li>
-   <li><b>List all students with an average GPA above 90% in their current course.</b></li>
-   <li><b>List all students who attended less than 80% of their lessons.</b></li>
+   <li><b>List all students from the university with current GPA above 90%.</b></li>
+   <li><b>List all students who attended less than 80% of some lessons.</b></li>
    <li><b>List all classrooms on the 3rd floor of a Baizak building.</b></li>
    <li><b>List all subjects scheduled for group IT2-2404SE on Monday.</b></li>
-   <li><b>List all departments that include C++ programming.</b></li>
+   <li><b>List all departments that include C++ programming language.</b></li>
    <li><b>List the top 5 groups from the second-year course based on the average GPA of students.</b></li>
-   <li><b>List all teachers who are assigned to more than 2 subjects.</b></li>
    <li><b>List all students who have participated in more than 2 clubs.</b></li>
    <li><b>List all exams scheduled for next week.</b></li>
-   <li><b>List all students who haven't submitted their assignments on time.</b></li>
+   <li><b>List all students who haven't submitted their assignments on time on the last week.</b></li>
 </ol>
 
 <hr />
 
-<h2 style="color: #ef75c0; border-bottom: none; text-align: center;">Thank you for your time!</h2>
+<h2 style="color: #222222; border-bottom: none; text-align: center;">Thank you for your time!</h2>
