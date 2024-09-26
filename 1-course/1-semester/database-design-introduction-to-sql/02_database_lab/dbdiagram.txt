@@ -9,6 +9,12 @@ Table faculties {
   description varchar(500) [note: 'Faculty description, 20-500 characters']
 }
 
+Table deans {
+  dean_id integer [primary key, increment]
+  faculty_id integer [ref: > faculties.faculty_id]
+  personal_info_id integer [ref: > personal_info.personal_info_id]
+}
+
 Table departments {
   department_id integer [primary key, increment]
   faculty_id integer [ref: > faculties.faculty_id]
@@ -23,13 +29,6 @@ Table programs {
   description varchar(500) [note: 'Program description, 20-500 characters']
 }
 
-Table subjects {
-  subject_id integer [primary key, increment]
-  name varchar(50) [not null, note: 'Subject name, 5-50 characters']
-  description varchar(250) [note: 'Subject description, 20-250 characters']
-  credits integer [default: 1, note: 'Credits (1-10)']
-}
-
 Table program_subject {
   program_id integer [ref: > programs.program_id]
   subject_id integer [ref: > subjects.subject_id]
@@ -39,54 +38,56 @@ Table program_subject {
   }
 }
 
-Table roles {
-  role_id integer [primary key, increment]
-  name varchar(50) [not null, note: 'Role name, must be one of: student, teacher, dean, etc.']
-  description varchar(250) [note: 'Role description, 10-250 characters']
+Table subjects {
+  subject_id integer [primary key, increment]
+  name varchar(50) [not null, note: 'Subject name, 5-50 characters']
+  description varchar(250) [note: 'Subject description, 20-250 characters']
+  credits integer [default: 1, note: 'Credits (1-10)']
 }
 
-Table persons {
-  person_id integer [primary key, increment]
-  role_id integer [ref: > roles.role_id]
+Table contact_info {
+  contact_info_id integer [primary key, increment]
+  email varchar(100) [not null, note: 'Valid email format']
+  phone_number varchar(15) [note: 'Phone number in Kazakhstan format, +7 followed by 10 digits']
+  address varchar(100) [note: 'Address, 10-100 characters']
+}
+
+Table personal_info {
+  personal_info_id integer [primary key, increment]
   first_name varchar(100) [not null, note: 'First name, 2-100 characters']
   last_name varchar(100) [not null, note: 'Last name, 2-100 characters']
   patronymic varchar(100) [note: 'Patronymic name, 2-100 characters']
   gender varchar(10) [note: 'Gender, can be MALE, FEMALE, or OTHER']
   birth_date date [note: 'Valid date; age must be between 17 and 70']
-  email varchar(100) [note: 'Email in valid format']
   iin varchar(12) [note: 'Unique identification number, exactly 12 digits']
-  address varchar(100) [note: 'Address, 10-100 characters']
   education varchar(200) [note: 'Education details, 20-200 characters']
+  contact_info_id integer [ref: > contact_info.contact_info_id]
 }
 
-Table phone_numbers {
-  phone_id integer [primary key, increment]
-  person_id integer [ref: > persons.person_id]
-  phone_number varchar(15) [note: 'Phone number in Kazakhstan format, +7 followed by 10 digits']
+Table students {
+  student_id integer [primary key, increment]
+  group_id integer [ref: > groups.group_id]
+  personal_info_id integer [ref: > personal_info.personal_info_id]
 }
 
-Table dean_faculty {
-  dean_id integer [ref: > persons.person_id]
-  faculty_id integer [ref: > faculties.faculty_id]
+Table teachers {
+  teacher_id integer [primary key, increment]
+  personal_info_id integer [ref: > personal_info.personal_info_id]
+}
+
+Table teacher_subject {
+  teacher_id integer [ref: > teachers.teacher_id]
+  subject_id integer [ref: > subjects.subject_id]
+  Note: 'Associative table for many-to-many relation between teachers and subjects'
   indexes {
-    (dean_id, faculty_id) [pk]
+    (teacher_id, subject_id) [pk]
   }
 }
 
 Table groups {
   group_id integer [primary key, increment]
-  head_student_id integer [ref: > persons.person_id]
-  curator_id integer [ref: > persons.person_id]
-  course_year integer [default: 1, note: 'Course year, must be between 1 and 4']
+  head_student_id integer [ref: > students.student_id]
   name varchar(20) [not null, note: 'Group name, 6-20 characters']
-}
-
-Table student_group {
-  student_id integer [ref: > persons.person_id]
-  group_id integer [ref: > groups.group_id]
-  indexes {
-    (student_id, group_id) [pk]
-  }
 }
 
 Table buildings {
@@ -110,7 +111,7 @@ Table schedules {
   schedule_id integer [primary key, increment]
   group_id integer [ref: > groups.group_id]
   subject_id integer [ref: > subjects.subject_id]
-  teacher_id integer [ref: > persons.person_id]
+  teacher_id integer [ref: > teachers.teacher_id]
   classroom_id integer [ref: > classrooms.classroom_id]
   weekday varchar(10) [note: 'Weekday (Monday to Sunday)']
   start_time time [note: 'Start time (24-hour format)']
@@ -119,16 +120,24 @@ Table schedules {
 
 Table assignments {
   assignment_id integer [primary key, increment]
-  schedule_id integer [ref: > schedules.schedule_id]
+  subject_id integer [ref: > subjects.subject_id]
   name varchar(40) [not null, note: 'Assignment name, 5-40 characters']
   description varchar(100) [note: 'Assignment description, 15-100 characters']
   deadline date [note: 'Assignment deadline date']
 }
 
-Table student_assignment {
-  student_id integer [ref: > persons.person_id]
+Table schedule_assignments {
+  schedule_id integer [ref: > schedules.schedule_id]
   assignment_id integer [ref: > assignments.assignment_id]
-  score integer [default: 0, note: 'Score between 0 and 10']
+  indexes {
+    (schedule_id, assignment_id) [pk]
+  }
+}
+
+Table student_assignment {
+  student_id integer [ref: > students.student_id]
+  assignment_id integer [ref: > assignments.assignment_id]
+  score integer [default: 0, note: 'Score between 0 and 100']
   indexes {
     (student_id, assignment_id) [pk]
   }
@@ -138,15 +147,19 @@ Table clubs {
   club_id integer [primary key, increment]
   name varchar(100) [not null, note: 'Club name, 5-100 characters']
   description varchar(500) [note: 'Club description, 20-500 characters']
-  founded_date date [note: 'Founded date, must be a past date']
 }
 
 Table student_club {
-  student_id integer [ref: > persons.person_id]
+  student_id integer [ref: > students.student_id]
   club_id integer [ref: > clubs.club_id]
   indexes {
     (student_id, club_id) [pk]
   }
+}
+
+Table rector {
+  rector_id integer [primary key, increment]
+  personal_info_id integer [ref: > personal_info.personal_info_id]
 }
 
 VISIT THIS LINK TO VIEW THE ER-DIAGRAM ON THE WEBSITE:
