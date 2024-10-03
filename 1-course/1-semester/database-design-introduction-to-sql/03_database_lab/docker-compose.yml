@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:17
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: university_db
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    ports:
+        - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com 
+      PGADMIN_DEFAULT_PASSWORD: root 
