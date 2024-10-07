@@ -1,0 +1,141 @@
+Table users {
+  id integer [primary key]
+  avatar varchar
+  first_name varchar
+  last_name varchar
+  patronymic varchar
+  username varchar [not null, unique]
+  email varchar [not null, unique]
+  password varchar
+  birth_of_date date
+  phone_number varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table addresses {
+  id integer [primary key]
+  user_id integer
+  title varchar
+  country varchar
+  city varchar
+  phone_number varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table categories {
+  id integer [primary key]
+  name varchar
+  description varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table products {
+  id integer [primary key]
+  name varchar
+  description varchar
+  summary varchar
+  cover varchar
+  brand varchar
+  model varchar
+  category_id integer
+  price decimal
+  quantity integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table product_attributes {
+  id integer [primary key]
+  product_id integer
+  attribute_name varchar
+  attribute_value varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cart {
+  id integer [primary key]
+  user_id integer
+  total decimal
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cart_item {
+  id integer [primary key]
+  cart_id integer
+  product_id integer
+  quantity integer
+  price decimal
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table orders {
+  id integer [primary key]
+  user_id integer
+  total decimal
+  status varchar
+  shipping_address_id integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table order_items {
+  id integer [primary key]
+  order_id integer
+  product_id integer
+  quantity integer
+  price decimal
+  created_at timestamp
+}
+
+Table reviews {
+  id integer [primary key]
+  user_id integer
+  product_id integer
+  rating integer [note: "Rating from 1 to 5"]
+  comment text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table shipping {
+  id integer [primary key]
+  order_id integer
+  carrier varchar
+  tracking_number varchar
+  shipping_cost decimal
+  status varchar
+  shipped_at timestamp
+  delivered_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: addresses.user_id > users.id 
+
+Ref: products.category_id > categories.id
+
+Ref: product_attributes.product_id > products.id
+
+Ref: cart.user_id > users.id
+Ref: cart_item.cart_id > cart.id
+Ref: cart_item.product_id > products.id
+
+Ref: orders.user_id > users.id
+Ref: orders.shipping_address_id > addresses.id
+
+Ref: order_items.order_id > orders.id
+Ref: order_items.product_id > products.id
+
+Ref: reviews.user_id > users.id
+Ref: reviews.product_id > products.id
+
+Ref: shipping.order_id > orders.id
+
+VISIT THIS LINK TO VIEW THE ER-DIAGRAM ON THE WEBSITE:
+https://dbdiagram.io/d/E-commerce-Database-Design-6703cdfafb079c7ebd9812de
