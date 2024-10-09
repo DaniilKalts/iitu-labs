@@ -8,7 +8,7 @@ CREATE TABLE departments (
 	department_id SERIAL PRIMARY KEY,
 	faculty_id INTEGER,
 	name VARCHAR(100) NOT NULL UNIQUE,
-	description VARCHAR(200),
+	-- description VARCHAR(200),
 	
 	FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id)
 );
