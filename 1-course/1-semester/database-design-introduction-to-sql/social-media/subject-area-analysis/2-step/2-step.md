@@ -38,7 +38,6 @@
   <li><b>goals_categories</b></li>
   <li><b>media</b></li>
   <li><b>posts</b></li>
-  <li><b>post_categories</b></li>
   <li><b>comments</b></li>
   <li><b>bookmarks</b></li>
   <li><b>subscriptions</b></li>
@@ -70,6 +69,7 @@
   <li><b>categories:</b>
     <ul>
       <li>category_id (PK)</li>
+      <li>author_id (FK to users.user_id, NOT NULL)</li>
       <li>name (VARCHAR, minimum 4 characters, maximum 16 characters, UNIQUE, NOT NULL)</li>
       <li>description (VARCHAR, minimum 20 characters, maximum 100 characters)</li>
       <li>parent_category_id (FK to categories.category_id)</li>
@@ -81,7 +81,7 @@
       <li>goal_id (PK)</li>
       <li>author_id (FK to users.user_id, NOT NULL)</li>
       <li>name (VARCHAR, minimum 10 characters, maximum 50 characters, NOT NULL)</li>
-      <li>description (VARCHAR, minimum 50 characters, maximum 200 characters)</li>
+      <li>description (VARCHAR, minimum 51 characters, maximum 200 characters)</li>
       <li>status (ENUM: 'in progress', 'completed', 'overdue', default 'in progress')</li>
       <li>priority (INTEGER, between 1 and 10, NOT NULL)</li>
       <li>deadline (DATE, must be a future date and greater than created_at)</li>
@@ -123,14 +123,7 @@
       <li>status (ENUM: 'draft', 'published', 'archived', default 'published')</li>
       <li>created_at (DATETIME, default CURRENT_TIMESTAMP, NOT NULL)</li>
       <li>updated_at (DATETIME, default CURRENT_TIMESTAMP, NOT NULL)</li>
-    </ul>
-  </li>
-  <li><b>post_categories:</b>
-    <ul>
-      <li>post_id (FK to posts.post_id, NOT NULL)</li>
-      <li>category_id (FK to categories.category_id, NOT NULL)</li>
-      <li>created_at (DATETIME, default CURRENT_TIMESTAMP, NOT NULL)</li>
-      <li>PRIMARY KEY (post_id, category_id)</li>
+      <li>UNIQUE (post_id, media_id)</li>
     </ul>
   </li>
   <li><b>comments:</b>
@@ -138,6 +131,7 @@
       <li>comment_id (PK)</li>
       <li>author_id (FK to users.user_id, NOT NULL)</li>
       <li>post_id (FK to posts.post_id, NOT NULL)</li>
+      <li>parent_comment_id (FK to comments.comment_id)</li>
       <li>description (VARCHAR, minimum 50 characters, maximum 700 characters, NOT NULL)</li>
       <li>created_at (DATETIME, default CURRENT_TIMESTAMP, NOT NULL)</li>
       <li>updated_at (DATETIME, default CURRENT_TIMESTAMP, NOT NULL)</li>

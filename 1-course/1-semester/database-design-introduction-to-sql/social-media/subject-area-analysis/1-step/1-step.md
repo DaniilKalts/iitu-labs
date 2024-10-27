@@ -68,7 +68,6 @@
   <li><strong>goals_categories</strong>: Links goals to categories.</li>
   <li><strong>media</strong>: Stores photos and videos uploaded by users.</li>
   <li><strong>posts</strong>: Houses posts about completed goals.</li>
-  <li><strong>post_categories</strong>: Connects posts to relevant categories.</li>
   <li><strong>comments</strong>: Lets users comment on posts and share feedback.</li>
   <li><strong>bookmarks</strong>: Stores saved posts in an organized structure.</li>
   <li><strong>subscriptions</strong>: Manages user subscriptions with privacy in mind.</li>
