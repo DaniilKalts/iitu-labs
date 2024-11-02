@@ -1,0 +1,147 @@
+Table users {
+  user_id integer [pk]
+  first_name varchar [note: "2-16 characters"]
+  last_name varchar [note: "2-16 characters"]
+  nickname varchar [not null, unique, note: "4-16 characters"]
+  avatar_id integer [ref: > media.media_id]
+  description varchar [note: "20-220 characters"]
+  date_of_birth date [note: "Between 1970 and current year - 7"]
+  email varchar [not null, unique, note: "Ends with '@gmail.com', max 100 chars"]
+  password varchar [not null, note: "8-16 characters"]
+  last_login datetime
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table categories {
+  category_id integer [pk]
+  author_id integer [ref: > users.user_id, not null]
+  name varchar [not null, unique, note: "4-16 characters"]
+  description varchar [note: "20-100 characters"]
+  parent_category_id integer [ref: > categories.category_id]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table goals {
+  goal_id integer [pk]
+  author_id integer [ref: > users.user_id, not null]
+  name varchar [not null, note: "10-50 characters"]
+  description varchar [note: "51-200 characters"]
+  status enum('in progress', 'completed', 'overdue') [default: 'in progress']
+  priority integer [not null, note: "1-10"]
+  deadline date [note: "Must be future date and greater than created_at"]
+  completed_at datetime
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table goals_categories {
+  goal_id integer [ref: > goals.goal_id, not null]
+  category_id integer [ref: > categories.category_id, not null]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  indexes {
+    (goal_id, category_id) [pk]
+  }
+}
+
+Table media {
+  media_id integer [pk]
+  author_id integer [ref: > users.user_id, not null]
+  media_type enum('image', 'video') [not null]
+  file_path varchar [not null, unique, note: "Max 255 characters"]
+  thumbnail_path varchar [note: "Max 255 characters, nullable"]
+  file_size integer [not null, note: "In KB or MB"]
+  width integer [null]
+  height integer [null]
+  duration float [null]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table posts {
+  post_id integer [pk]
+  goal_id integer [ref: > goals.goal_id, not null]
+  media_id integer [ref: > media.media_id, not null]
+  title varchar [not null, note: "10-50 characters"]
+  description varchar [not null, note: "50-1400 characters"]
+  status enum('draft', 'published', 'archived') [default: 'published']
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  indexes {
+    (post_id, media_id) [unique]
+  }
+}
+
+Table comments {
+  comment_id integer [pk]
+  author_id integer [ref: > users.user_id, not null]
+  post_id integer [ref: > posts.post_id, not null]
+  parent_comment_id integer [ref: > comments.comment_id]
+  description varchar [not null, note: "50-700 characters"]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table bookmarks {
+  bookmark_id integer [pk]
+  user_id integer [ref: > users.user_id, not null]
+  post_id integer [ref: > posts.post_id, not null]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  indexes {
+    (user_id, post_id) [unique]
+  }
+}
+
+Table subscriptions {
+  subscription_id integer [pk]
+  user_id integer [ref: > users.user_id, not null]
+  followee_id integer [ref: > users.user_id, not null]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  indexes {
+    (user_id, followee_id) [unique]
+  }
+}
+
+Table messages {
+  message_id integer [pk]
+  sender_id integer [ref: > users.user_id, not null]
+  recipient_id integer [ref: > users.user_id, not null]
+  media_id integer [ref: > media.media_id]
+  content varchar [note: "Max 1400 characters"]
+  status enum('sent', 'read') [default: 'sent']
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table notifications {
+  notification_id integer [pk]
+  title varchar [not null, note: "10-50 characters"]
+  description varchar [not null, note: "20-400 characters"]
+  is_global boolean [default: false]
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+Table user_notifications {
+  user_id integer [ref: > users.user_id, not null]
+  notification_id integer [ref: > notifications.notification_id, not null]
+  status enum('unread', 'read') [default: 'unread']
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  indexes {
+    (user_id, notification_id) [pk]
+  }
+}
+
+Table reports {
+  report_id integer [pk]
+  author_id integer [ref: > users.user_id, not null]
+  post_id integer [ref: > posts.post_id]
+  media_id integer [ref: > media.media_id]
+  description varchar [not null, note: "50-700 characters"]
+  status enum('pending', 'resolved', 'rejected') [default: 'pending']
+  created_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+  updated_at datetime [default: `CURRENT_TIMESTAMP`, not null]
+}
+
+VISIT THIS LINK TO VIEW THE ER-DIAGRAM ON THE WEBSITE:
+https://dbdiagram.io/d/E-commerce-Database-Design-6703cdfafb079c7ebd9812de
