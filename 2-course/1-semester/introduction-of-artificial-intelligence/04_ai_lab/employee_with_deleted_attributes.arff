@@ -1,0 +1,13 @@
+@relation 'employee-weka.filters.unsupervised.attribute.Remove-weka.filters.unsupervised.attribute.Remove-weka.filters.unsupervised.attribute.Remove-weka.filters.unsupervised.attribute.Remove-weka.filters.unsupervised.attribute.Remove-weka.filters.unsupervised.attribute.Remove-R3,5'
+
+@attribute name {x,y,z,a,b}
+@attribute id numeric
+@attribute exp numeric
+@attribute phone numeric
+
+@data
+x,101,2,250311
+y,102,3,251665
+z,103,1,240238
+a,104,5,200200
+b,105,2,240240
