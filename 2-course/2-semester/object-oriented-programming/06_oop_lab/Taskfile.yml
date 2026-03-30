@@ -1,0 +1,48 @@
+version: "3"
+
+vars:
+  JAVAFX_VERSION: "23.0.2"
+  JAVAFX_URL: "https://download2.gluonhq.com/openjfx/{{.JAVAFX_VERSION}}/openjfx-{{.JAVAFX_VERSION}}_linux-x64_bin-sdk.zip"
+  JAVAFX_ZIP: "openjfx.zip"
+  JAVAFX_DIR: "lib/javafx-sdk-{{.JAVAFX_VERSION}}"
+
+tasks:
+  default:
+    desc: "Show available commands"
+    cmds:
+      - task --list
+
+  setup:
+    desc: "Download and extract JavaFX SDK locally"
+    status:
+      - test -d {{.JAVAFX_DIR}}
+    cmds:
+      - mkdir -p lib
+      - wget -qO lib/{{.JAVAFX_ZIP}} {{.JAVAFX_URL}}
+      - unzip -q lib/{{.JAVAFX_ZIP}} -d lib/
+      - rm lib/{{.JAVAFX_ZIP}}
+      - echo "JavaFX SDK downloaded to {{.JAVAFX_DIR}}"
+
+  compile:
+    desc: "Compile all Java files"
+    deps: [setup]
+    cmds:
+      - mkdir -p out
+      - javac --module-path {{.JAVAFX_DIR}}/lib --add-modules javafx.controls,javafx.fxml -d out $(find src/main/java -name "*.java")
+
+  run:
+    desc: "Run the Main Menu Launcher"
+    deps: [compile]
+    cmds:
+      - java --module-path {{.JAVAFX_DIR}}/lib --add-modules javafx.controls,javafx.fxml -cp out com.lab6.MainMenu
+
+  clean:
+    desc: "Clean output files (does NOT remove downloaded JavaFX SDK)"
+    cmds:
+      - rm -rf out
+
+  distclean:
+    desc: "Clean everything including the downloaded JavaFX SDK"
+    cmds:
+      - rm -rf out
+      - rm -rf lib
