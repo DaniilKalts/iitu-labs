@@ -1,0 +1,36 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Show available commands
+    cmds:
+      - task --list
+
+  compile:
+    desc: Compile all Java files
+    cmds:
+      - javac $(find src/main/java -name "*.java")
+
+  task1:
+    desc: Run Task 1 (User Management)
+    deps: [compile]
+    cmds:
+      - java -cp src/main/java com.daniilkalts.task1.Main
+
+  task2-admin:
+    desc: Run Task 2 (Admin Shop Panel)
+    deps: [compile]
+    cmds:
+      - java -cp src/main/java com.daniilkalts.task2.Admin
+
+  task2-client:
+    desc: Run Task 2 (Client Shop Panel)
+    deps: [compile]
+    cmds:
+      - java -cp src/main/java com.daniilkalts.task2.Client
+
+  clean:
+    desc: Remove all compiled .class files
+    cmds:
+      - find . -name "*.class" -type f -delete
+      - rm -rf out
