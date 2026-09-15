@@ -1,0 +1,37 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:latest
+    container_name: plsql-oracle
+    environment:
+      # Password for the SYS, SYSTEM, and PDBADMIN accounts.
+      ORACLE_PASSWORD: Qwerty1234!
+      # A regular schema user, created in the FREEPDB1 pluggable database.
+      APP_USER: daniilkalts
+      APP_USER_PASSWORD: Qwerty1234!
+    ports:
+      # Exposed only on this computer; CloudBeaver connects over the Compose network.
+      - "127.0.0.1:1521:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: plsql-cloudbeaver
+    depends_on:
+      oracle:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8978:8978"
+    volumes:
+      # Keeps CloudBeaver users, settings, and saved connections between restarts.
+      - cloudbeaver-workspace:/opt/cloudbeaver/workspace
+
+volumes:
+  oracle-data:
+  cloudbeaver-workspace:
