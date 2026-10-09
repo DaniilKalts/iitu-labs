@@ -1,412 +1,259 @@
-# Practice 2 — Variables and Statements
+# Lab 2. Creating anonymous blocks
 
-| Item | Value |
-| --- | --- |
-| Student | Daniil Kalts |
-| Group | it2-2404SE |
-| Subject | PL/SQL |
-| DBMS | Oracle Database |
+Daniil Kalts  
+Group: it2-2404SE
 
-## 1. Which PL/SQL blocks run without errors?
+Use the database and test data from Lab 1. Run each block separately and view the results in DBMS Output.
 
-### a.
+## 1. Record and IF
+
+Get the first order and check its status.
+
+```sql
+DECLARE
+    my_order orders%ROWTYPE;
+BEGIN
+    SELECT * INTO my_order
+    FROM orders
+    WHERE id = (SELECT MIN(id) FROM orders);
+
+    DBMS_OUTPUT.PUT_LINE('Order: ' || my_order.id);
+    DBMS_OUTPUT.PUT_LINE('Status: ' || my_order.status_code);
+
+    IF my_order.status_code = 'DELIVERED' THEN
+        DBMS_OUTPUT.PUT_LINE('Delivered');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Not delivered');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No orders');
+END;
+```
+
+## 2. INDEX BY table
+
+Put the names of low-stock products into a collection, then print them.
+
+```sql
+DECLARE
+    TYPE names_type IS TABLE OF products.name%TYPE
+        INDEX BY PLS_INTEGER;
+    names names_type;
+    i PLS_INTEGER := 0;
+BEGIN
+    FOR product IN (
+        SELECT name FROM products WHERE quantity < 10
+    ) LOOP
+        i := i + 1;
+        names(i) := product.name;
+    END LOOP;
+
+    FOR j IN 1..names.COUNT LOOP
+        DBMS_OUTPUT.PUT_LINE(names(j));
+    END LOOP;
+END;
+```
+
+## 3. Explicit cursor
+
+Print low-stock products using OPEN, FETCH and CLOSE.
+
+```sql
+DECLARE
+    CURSOR c_products IS
+        SELECT name, quantity FROM products WHERE quantity < 10;
+    product c_products%ROWTYPE;
+BEGIN
+    OPEN c_products;
+    LOOP
+        FETCH c_products INTO product;
+        EXIT WHEN c_products%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(product.name || ': ' || product.quantity);
+    END LOOP;
+    CLOSE c_products;
+END;
+```
+
+## 4. Cursor with a parameter
+
+Print orders for user ID 1. Change 1 to another user ID if needed.
+
+```sql
+DECLARE
+    CURSOR c_orders(customer_id orders.user_id%TYPE) IS
+        SELECT id, status_code FROM orders WHERE user_id = customer_id;
+    my_order c_orders%ROWTYPE;
+BEGIN
+    OPEN c_orders(1);
+    LOOP
+        FETCH c_orders INTO my_order;
+        EXIT WHEN c_orders%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(my_order.id || ': ' || my_order.status_code);
+    END LOOP;
+    CLOSE c_orders;
+END;
+```
+
+## 5. Cursor FOR loop
+
+Print the product ID and rating for each review.
+
+```sql
+DECLARE
+    CURSOR c_reviews IS
+        SELECT product_id, rating FROM reviews;
+BEGIN
+    FOR review IN c_reviews LOOP
+        DBMS_OUTPUT.PUT_LINE(review.product_id || ': ' || review.rating || '/5');
+    END LOOP;
+END;
+```
+
+## 6. CASE
+
+Print order item quantities and label them as small, medium or large.
 
 ```sql
 BEGIN
+    FOR item IN (SELECT id, quantity FROM order_items) LOOP
+        DBMS_OUTPUT.PUT_LINE('Item ' || item.id || ': ' || item.quantity);
+        CASE
+            WHEN item.quantity >= 5 THEN
+                DBMS_OUTPUT.PUT_LINE('Large');
+            WHEN item.quantity >= 2 THEN
+                DBMS_OUTPUT.PUT_LINE('Medium');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('Small');
+        END CASE;
+    END LOOP;
 END;
 ```
 
-- [ ] Correct
-- [x] Incorrect
+## Questions
 
-**Explanation:** The execution block can't be empty.
+### 1. Structure of an anonymous block
 
-### b.
+DECLARE is for declarations, BEGIN is for statements, EXCEPTION is for errors, END finishes the block. DECLARE and EXCEPTION are optional.
 
-```sql
-DECLARE
-    amount INTEGER(10);
-END;
-```
+### 2. Types of blocks
 
-- [ ] Correct
-- [x] Incorrect
+Anonymous blocks, procedures and functions. A block can contain another block.
 
-**Explanation:** A PL/SQL block must have `BEGIN` and `END` sections. Also, `INTEGER` doesn't accept a size.
+### 3. Declaring variables
 
-### c.
+Write the name and data type before BEGIN. Use := to assign a value. End the declaration with a semicolon.
 
 ```sql
-DECLARE
-BEGIN
-END;
+price NUMBER := 100;
+name VARCHAR2(50);
 ```
 
-- [ ] Correct
-- [x] Incorrect
+### 4. Composite data types
 
-**Explanation:** The execution block can't be empty.
+Records and collections: INDEX BY tables, nested tables and VARRAYs.
 
-### d.
+### 5. Record and INDEX BY table
+
+A record has fields, like id and status. An INDEX BY table has elements accessed by keys, like names(1).
+
+### 6. Two ways to create a record
+
+Using a table:
 
 ```sql
-DECLARE
-    amount INTEGER(10);
-BEGIN
-    DBMS_OUTPUT.PUT_LINE(amount);
-END;
+my_order orders%ROWTYPE;
 ```
 
-- [ ] Correct
-- [x] Incorrect
-
-**Explanation:** `INTEGER` doesn't accept a size.
-
-## 2. Write and run an anonymous block that prints “Hello World.”
+Using a custom type:
 
 ```sql
-BEGIN
-    DBMS_OUTPUT.PUT_LINE('Hello World');
-END;
+TYPE order_type IS RECORD (
+    id NUMBER,
+    status VARCHAR2(20)
+);
+my_order order_type;
 ```
 
-## 3. Which declarations are correct? Explain why the others are incorrect.
+### 7. Creating an INDEX BY table
 
-### a.
+Declare the type and a variable in DECLARE:
 
 ```sql
-DECLARE
-    name,dept VARCHAR2(14);
+TYPE names_type IS TABLE OF VARCHAR2(100) INDEX BY PLS_INTEGER;
+names names_type;
 ```
 
-- [ ] Correct
-- [x] Incorrect
-
-**Explanation:** Can't create multiple variables in a single line.
-
-### b.
+Assign an element after BEGIN:
 
 ```sql
-DECLARE
-    test NUMBER(5);
+names(1) := 'Alice';
 ```
 
-- [x] Correct
-- [ ] Incorrect
+### 8. %TYPE
 
-**Explanation:** The canonical order: variable name, data type. Number accepts a parameter for precision.
-
-### c.
+Uses the data type of a column or variable.
 
 ```sql
-DECLARE
-    MAXSALARY NUMBER(7,2) = 5000;
+price products.price%TYPE;
 ```
 
-- [ ] Correct
-- [x] Incorrect
+### 9. %ROWTYPE
 
-**Explanation:** Assign operator in PL/SQL is `:=`.
-
-### d.
+Creates a record with the fields of a table row or cursor result.
 
 ```sql
-DECLARE
-    JOINDATE BOOLEAN := SYSDATE;
+my_order orders%ROWTYPE;
 ```
 
-- [ ] Correct
-- [x] Incorrect
+### 10. Loops
 
-**Explanation:** `SYSDATE` returns date, which is not compatible with `BOOLEAN` data types
+LOOP repeats until we exit. WHILE repeats while a condition is true. Numeric FOR goes through a range. Cursor FOR goes through query rows.
 
-## 4. What is the data type of the expression on the right side of each assignment?
+### 11. CASE types
 
-### a.
+Simple CASE checks one value. Searched CASE checks conditions.
 
 ```sql
-email := firstname || to_char(empno);
+CASE status
+    WHEN 'DELIVERED' THEN DBMS_OUTPUT.PUT_LINE('Done');
+    ELSE DBMS_OUTPUT.PUT_LINE('Other');
+END CASE;
 ```
-
-**Type:** VARCHAR2
-
-### b.
 
 ```sql
-confirm := to_date('20-JAN-1999', 'DD-MON-YYYY');
+CASE
+    WHEN quantity < 10 THEN DBMS_OUTPUT.PUT_LINE('Low stock');
+    ELSE DBMS_OUTPUT.PUT_LINE('Enough');
+END CASE;
 ```
 
-**Type:** DATE
+### 12. Implicit cursors
 
-### c.
+Oracle handles them automatically for SQL statements. SQL%FOUND means a row was affected or returned. SQL%NOTFOUND means no rows. SQL%ROWCOUNT is the number of rows. SQL%ISOPEN is always false.
 
-```sql
-sal := (1000*12) + 500
-```
+SELECT INTO raises NO_DATA_FOUND if no row matches.
 
-**Type:** NUMBER
+### 13. Explicit cursors
 
-### d.
+We declare them ourselves to process query results one row at a time.
 
-```sql
-test := FALSE;
-```
+### 14. Explicit cursor attributes
 
-**Type:** BOOLEAN
+%ISOPEN checks if the cursor is open. %FOUND checks if the last fetch returned a row. %NOTFOUND checks if it did not. %ROWCOUNT counts fetched rows.
 
-### e.
+### 15. Declaring a cursor
 
-```sql
-temp := temp1 < (temp2/3);
-```
+Defines its name, query and optional parameters. The query does not run yet.
 
-**Type:** BOOLEAN
+### 16. Opening a cursor
 
-### f.
+Runs the query and prepares the result for fetching.
 
-```sql
-var := sysdate;
-```
+### 17. Fetching a cursor
 
-**Type:** DATE
+Copies the next row into variables or a record.
 
-## 5. Which variable names are correct?
+### 18. Closing a cursor
 
-### a.
-
-```sql
-today
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-### b.
-
-```sql
-last_name
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-### c.
-
-```sql
-today’s_date
-```
-
-- [ ] Correct
-- [x] Incorrect
-
-**Explanation:** Can't use `'` in variable names.
-
-### d.
-
-```sql
-Number_of_days_in_February_this_year
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-### e.
-
-```sql
-Isleap$year
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-### f.
-
-```sql
-#number
-```
-
-- [ ] Correct
-- [x] Incorrect
-
-**Explanation:** Can't use `#` character in the beginning of variable names.
-
-### g.
-
-```sql
-NUMBER#
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-### h.
-
-```sql
-number1to7
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-## 6. Which variable declarations and starting values are correct?
-
-### a.
-
-```sql
-number_of_copies PLS_INTEGER;
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-### b.
-
-```sql
-printer_name constant VARCHAR2(10);
-```
-
-- [ ] Correct
-- [x] Incorrect
-
-**Explanation:** A constant must have a value.
-
-### c.
-
-```sql
-deliver_to VARCHAR2(10):=Johnson;
-```
-
-- [ ] Correct
-- [x] Incorrect
-
-**Explanation:** The `Johnson` isn't written inside single quotes.
-
-### d.
-
-```sql
-by_when DATE:= SYSDATE+1;
-```
-
-- [x] Correct
-- [ ] Incorrect
-
-## 7. Read the block and choose the correct statement.
-
-```sql
-DECLARE
-    fname VARCHAR2(20);
-    lname VARCHAR2(15) DEFAULT 'fernandez';
-BEGIN
-    DBMS_OUTPUT.PUT_LINE( FNAME ||' ' ||lname);
-END;
-/
-```
-
-- [x] The block runs and prints ‘fernandez’ (with a space before the last name).
-- [ ] The block gives an error because `fname` has no starting value.
-- [ ] The block runs and prints ‘null fernandez’.
-- [ ] The block gives an error because `DEFAULT` cannot set the starting value of a `VARCHAR2` variable.
-- [ ] The block gives an error because `FNAME` is not declared.
-
-## 8. Print today and tomorrow
-
-Write an anonymous block. Declare `today` as `DATE` and set it to `SYSDATE`. Declare `tomorrow` using `today%TYPE`. In the `BEGIN` section, set `tomorrow` to `today + 1`. Print “Hello World”, then both dates.
-
-```sql
-DECLARE
-    today DATE := SYSDATE;
-    tomorrow today%TYPE;
-BEGIN
-    tomorrow := today + 1;
-    DBMS_OUTPUT.PUT_LINE('Hello World');
-    DBMS_OUTPUT.PUT_LINE('Today: ' || TO_CHAR(today, 'YYYY-MM-DD'));
-    DBMS_OUTPUT.PUT_LINE('Tomorrow: ' || TO_CHAR(tomorrow, 'YYYY-MM-DD'));
-END;
-```
-
-## 9. Find each variable’s type and value at positions 1 and 2
-
-```sql
-DECLARE
-    weight NUMBER(3) := 600;
-    message VARCHAR2(255) := 'Product 10012';
-BEGIN
-    DECLARE
-        weight NUMBER(3) := 1;
-        message VARCHAR2(255) := 'Product 11001';
-        new_locn VARCHAR2(50) := 'Europe';
-    BEGIN
-        weight := weight + 1;
-        new_locn := 'Western ' || new_locn;
-    END;
-    weight := weight + 1;
-    message := message || ' is in stock';
-    new_locn := 'Western ' || new_locn;
-END;
-```
-
-Here, position 1 means the end of the inner block, and position 2 means the end of the main block.
-
-| Item | Variable | Position | Type | Value |
-| --- | --- | --- | --- | --- |
-| a | `weight` | 1 | `NUMBER(3)` | `2` |
-| b | `new_locn` | 1 | `VARCHAR2(50)` | `Western Europe` |
-| c | `weight` | 2 | `NUMBER(3)` | `601` |
-| d | `message` | 2 | `VARCHAR2(255)` | `Product 10012 is in stock` |
-| e | `new_locn` | 2 | Not available here | Out of scope |
-
-
-## 10. Find each variable’s type and value in the inner and main blocks
-
-```sql
-DECLARE
-    customer VARCHAR2(50) := 'Womansport';
-    credit_rating VARCHAR2(50) := 'EXCELLENT';
-BEGIN
-    DECLARE
-        customer NUMBER(7) := 201;
-        c_name VARCHAR2(25) := 'Unisports';
-    BEGIN
-        credit_rating :='GOOD';
-        …
-    END;
-    …
-END;
-```
-
-The `…` marks show omitted code in the task. Inner values are taken after the assignment. Main values are taken after the inner block ends, assuming no other changes.
-
-| Item | Variable | Block | Type | Value |
-| --- | --- | --- | --- | --- |
-| a | `customer` | Inner | `NUMBER(7)` | `201` |
-| b | `c_name` | Inner | `VARCHAR2(25)` | `Unisports` |
-| c | `credit_rating` | Inner | `VARCHAR2(50)` | `GOOD` |
-| d | `customer` | Main | `VARCHAR2(50)` | `Womansport` |
-| e | `c_name` | Main | Not available here | Out of scope |
-| f | `credit_rating` | Main | `VARCHAR2(50)` | `GOOD` |
-
-
-## 11. Print an employee’s name, salary, and PF contribution
-
-Declare `fname` as `VARCHAR2(15)` and `emp_sal` as `NUMBER`. Get the first name and salary for employee ID `100`. Print “Hello” with the name, then print salary and provident fund (PF) contribution.
-
-Basic salary is 45% of salary. PF is 12% of basic salary. Calculate PF in one expression.
-
-This answer assumes an `employees` table with `employee_id`, `first_name`, and `salary` columns, and a row with ID `100`.
-
-```sql
-DECLARE
-    fname VARCHAR2(15);
-    emp_sal NUMBER;
-BEGIN
-    SELECT first_name, salary
-    INTO fname, emp_sal
-    FROM employees
-    WHERE employee_id = 100;
-
-    DBMS_OUTPUT.PUT_LINE('Hello ' || fname);
-    DBMS_OUTPUT.PUT_LINE('Salary: ' || emp_sal);
-    DBMS_OUTPUT.PUT_LINE('PF: ' || emp_sal * 0.45 * 0.12);
-END;
-```
-
+Releases its resources. We must reopen it before fetching again.
