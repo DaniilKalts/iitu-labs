@@ -1,0 +1,32 @@
+[
+  {
+    "customer_id":"C0461",
+    "name":"Customer_461",
+    "transaction_count":24,
+    "total_purchase":20445.29
+  },
+  {
+    "customer_id":"C0106",
+    "name":"Customer_106",
+    "transaction_count":23,
+    "total_purchase":20300.62
+  },
+  {
+    "customer_id":"C0435",
+    "name":"Customer_435",
+    "transaction_count":30,
+    "total_purchase":20004.97
+  },
+  {
+    "customer_id":"C0395",
+    "name":"Customer_395",
+    "transaction_count":22,
+    "total_purchase":19847.61
+  },
+  {
+    "customer_id":"C0271",
+    "name":"Customer_271",
+    "transaction_count":22,
+    "total_purchase":19680.18
+  }
+]
